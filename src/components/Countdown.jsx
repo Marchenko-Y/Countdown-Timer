@@ -1,5 +1,14 @@
 import React from "react";
 
+const copyToClipBoard = str => {
+  const el = document.createElement("textarea");
+  el.value = str;
+  document.body.appendChild(el);
+  el.select();
+  document.execCommand("copy");
+  document.body.removeChild(el);
+};
+
 class Countdown extends React.Component {
   constructor(props) {
     super(props);
@@ -35,6 +44,16 @@ class Countdown extends React.Component {
   }
 
   componentDidMount() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const event = urlParams.get("event");
+    const date = urlParams.get("eventDate");
+    if (event && date) {
+      this.setState({
+        event,
+        eventDate: date
+      });
+    }
+
     this.timer = setInterval(() => {
       this.calculateTimeToEvent(this.state.eventDate);
     }, 1000);
@@ -49,6 +68,13 @@ class Countdown extends React.Component {
     });
     e.preventDefault();
   }
+  handleCopyClick = e => {
+    e.preventDefault();
+    const currentLink = window.location.origin;
+    copyToClipBoard(
+      `${currentLink}?event=${this.state.event}&eventDate=${this.state.eventDate}`
+    );
+  };
   render() {
     const { event, days, hours, minutes, seconds } = this.state;
     return (
@@ -88,6 +114,10 @@ class Countdown extends React.Component {
               {seconds === 1 ? <span>second</span> : <span>seconds</span>}
             </div>
           </div>
+
+          <a href="" onClick={this.handleCopyClick}>
+            Copy link
+          </a>
         </div>
       </div>
     );
